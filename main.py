@@ -1,5 +1,4 @@
 class tictactoe:
-    turn = 0
     def __init__(self, gameBoard, side):
         self.gameBoard = gameBoard
         self.side = side
@@ -66,21 +65,23 @@ class tictactoe:
             aiMark = 'O'
         for x in range(len(self.gameBoard)):
             if self.gameBoard[x] == '-':
-                boards.append(nextMoveBoard(self.gameBoard, x, aiMark, True))
+                boards.append(nextMoveBoard(self.gameBoard, x, aiMark, True, True))
         maxVal = boards[0].pathValue()
-        index = 0
         for x in boards:
             if x.pathValue() > maxVal:
-                index += 1
                 maxVal = x.pathValue()
-        self.gameBoard[index] = aiMark
+        for x in boards:
+            if x.pathValue() == maxVal:
+                self.gameBoard[x.firstMove] = aiMark
+
+
     def printBoard(self):
         for x in range(0, 8, 3):
             print(self.gameBoard[x] + self.gameBoard[x+1] + self.gameBoard[x+2])
 
 class nextMoveBoard:
-    def __init__(self, board, firstMoveIndex, side, turn):
-        self.board = board
+    def __init__(self, board, firstMoveIndex, side, turn, first):
+        self.board = board.copy()
         self.firstMove = firstMoveIndex
         self.side = side
         self.turn = turn
@@ -88,13 +89,16 @@ class nextMoveBoard:
         self.depth = 1
         self.done = False
         self.innerBoards = []
-        board[self.firstMove] = side
+        self.firstBoard = first
+        self.board[self.firstMove] = side
         if tictactoe.boardCheck(self.board) == 0:
+            print('continue')
             if turn is True:
                 for x in range(len(self.board)):
                     if self.board[x] == '-':
-                        innerBoard = nextMoveBoard(self.board, x, self.side, False)
+                        innerBoard = nextMoveBoard(self.board, x, self.side, False, False)
                         innerBoard.depth = self.depth + 1
+                        print(innerBoard.board)
                         self.innerBoards.append(innerBoard)
             elif turn is False:
                 if side == 'X':
@@ -103,24 +107,22 @@ class nextMoveBoard:
                     playerMark = 'X'
                 for x in range(len(self.board)):
                     if self.board[x] == '-':
-                        innerBoard = nextMoveBoard(self.board, x, playerMark, True)
+                        innerBoard = nextMoveBoard(self.board, x, playerMark, True, False)
                         innerBoard.depth = self.depth + 1
+                        print(innerBoard.board)
                         self.innerBoards.append(innerBoard)
         elif tictactoe.boardCheck(self.board) == 1:
             self.value = 0
-        elif tictactoe.boardCheck(self.board) == 2:
-            self.value = 1
         elif tictactoe.boardCheck(self.board) == 3:
+            self.value = 1
+        elif tictactoe.boardCheck(self.board) == 2:
             self.value = -1
     def pathValue(self):
         valueSum = self.value
         for inner_board in self.innerBoards:
-            if inner_board.depth > 1:
-                valueSum += inner_board.pathValue()
-            else:
-                valueSum += inner_board.value
-            if len(inner_board.innerBoards) > 0:
-                valueSum += inner_board.pathValue()
+            inner_board_value = inner_board.pathValue()
+            if inner_board_value != 0:
+                valueSum += inner_board_value
         return valueSum
 
 
