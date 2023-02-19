@@ -30,67 +30,117 @@ class tictactoe:
             case 8:
                 self.gameBoard[8] = playerMark
 
-    def boardCheck(self):
+    def boardCheck(self, gameBoard):
         xwin = "XXX"
         owin = "OOO"
         # win check
-        if (self.gameBoard[0] + self.gameBoard[1] + self.gameBoard[2]) == xwin or (
-                self.gameBoard[3] + self.gameBoard[4] + self.gameBoard[5]) == xwin or (
-                self.gameBoard[6] + self.gameBoard[7] + self.gameBoard[8]) == xwin or (
-                self.gameBoard[0] + self.gameBoard[3] + self.gameBoard[6]) == xwin or (
-                self.gameBoard[1] + self.gameBoard[4] + self.gameBoard[7]) == xwin or (
-                self.gameBoard[2] + self.gameBoard[5] + self.gameBoard[8]) == xwin or (
-                self.gameBoard[0] + self.gameBoard[4] + self.gameBoard[8]) == xwin or (
-                self.gameBoard[2] + self.gameBoard[4] + self.gameBoard[6]) == xwin:
+        if (gameBoard[0] + gameBoard[1] + gameBoard[2]) == xwin or (
+                gameBoard[3] + gameBoard[4] + gameBoard[5]) == xwin or (
+                gameBoard[6] + gameBoard[7] + gameBoard[8]) == xwin or (
+                gameBoard[0] + gameBoard[3] + gameBoard[6]) == xwin or (
+                gameBoard[1] + gameBoard[4] + gameBoard[7]) == xwin or (
+                gameBoard[2] + gameBoard[5] + gameBoard[8]) == xwin or (
+                gameBoard[0] + gameBoard[4] + gameBoard[8]) == xwin or (
+                gameBoard[2] + gameBoard[4] + gameBoard[6]) == xwin:
             return 2
         # lose check
-        if (self.gameBoard[0] + self.gameBoard[1] + self.gameBoard[2]) == owin or (
-                self.gameBoard[3] + self.gameBoard[4] + self.gameBoard[5]) == owin or (
-                self.gameBoard[6] + self.gameBoard[7] + self.gameBoard[8]) == owin or (
-                self.gameBoard[0] + self.gameBoard[3] + self.gameBoard[6]) == owin or (
-                self.gameBoard[1] + self.gameBoard[4] + self.gameBoard[7]) == owin or (
-                self.gameBoard[2] + self.gameBoard[5] + self.gameBoard[8]) == owin or (
-                self.gameBoard[0] + self.gameBoard[4] + self.gameBoard[8]) == owin or (
-                self.gameBoard[2] + self.gameBoard[4] + self.gameBoard[6]) == owin:
+        if (gameBoard[0] + gameBoard[1] + gameBoard[2]) == owin or (
+                gameBoard[3] + gameBoard[4] + gameBoard[5]) == owin or (
+                gameBoard[6] + gameBoard[7] + gameBoard[8]) == owin or (
+                gameBoard[0] + gameBoard[3] + gameBoard[6]) == owin or (
+                gameBoard[1] + gameBoard[4] + gameBoard[7]) == owin or (
+                gameBoard[2] + gameBoard[5] + gameBoard[8]) == owin or (
+                gameBoard[0] + gameBoard[4] + gameBoard[8]) == owin or (
+                gameBoard[2] + gameBoard[4] + gameBoard[6]) == owin:
             return 3
         # draw check
-        if self.gameBoard.count('-') == 0:
+        if gameBoard.count('-') == 0:
             return 1
         return 0
 
     def aiMove(self):
-        moves = []
+        boards = []
         if self.side == 1:
             aiMark = 'X'
         else:
             aiMark = 'O'
-        score = 0
-        if self.turn == 0:
-            self.gameBoard[0] = aiMark
-            self.turn += 1
-        else:
-            x
-
+        for x in range(len(self.gameBoard)):
+            if self.gameBoard[x] == '-':
+                boards.append(nextMoveBoard(self.gameBoard, x, aiMark, True))
+        maxVal = boards[0].pathValue()
+        index = 0
+        for x in boards:
+            if x.pathValue() > maxVal:
+                index += 1
+                maxVal = x.pathValue()
+        self.gameBoard[index] = aiMark
     def printBoard(self):
         for x in range(0, 8, 3):
-            print(self.gameBoard[x] + self.gameBoard[x+1] + self.gameBoard[x+1])
+            print(self.gameBoard[x] + self.gameBoard[x+1] + self.gameBoard[x+2])
+
+class nextMoveBoard:
+    def __init__(self, board, firstMoveIndex, side, turn):
+        self.board = board
+        self.firstMove = firstMoveIndex
+        self.side = side
+        self.turn = turn
+        self.value = 0
+        self.depth = 1
+        self.done = False
+        self.innerBoards = []
+        board[self.firstMove] = side
+        if tictactoe.boardCheck(self.board) == 0:
+            if turn is True:
+                for x in range(len(self.board)):
+                    if self.board[x] == '-':
+                        innerBoard = nextMoveBoard(self.board, x, self.side, False)
+                        innerBoard.depth = self.depth + 1
+                        self.innerBoards.append(innerBoard)
+            elif turn is False:
+                if side == 'X':
+                    playerMark = 'O'
+                else:
+                    playerMark = 'X'
+                for x in range(len(self.board)):
+                    if self.board[x] == '-':
+                        innerBoard = nextMoveBoard(self.board, x, playerMark, True)
+                        innerBoard.depth = self.depth + 1
+                        self.innerBoards.append(innerBoard)
+        elif tictactoe.boardCheck(self.board) == 1:
+            self.value = 0
+        elif tictactoe.boardCheck(self.board) == 2:
+            self.value = 1
+        elif tictactoe.boardCheck(self.board) == 3:
+            self.value = -1
+    def pathValue(self):
+        valueSum = self.value
+        for inner_board in self.innerBoards:
+            if inner_board.depth > 1:
+                valueSum += inner_board.pathValue()
+            else:
+                valueSum += inner_board.value
+            if len(inner_board.innerBoards) > 0:
+                valueSum += inner_board.pathValue()
+        return valueSum
 
 
 board = ['-', '-', '-', '-', '-', '-', '-', '-', '-']
-n = int(input("First(0) or Second(1)"))
+n = int(input("First(0) or Second(1) "))
 
 playerF = True
 if n == 0:
     tictactoe = tictactoe(board, 0)
-    while True:
+    while tictactoe.boardCheck(tictactoe.gameBoard) == 0:
         tictactoe.playerMove()
         tictactoe.printBoard()
         tictactoe.aiMove()
+        tictactoe.printBoard()
 
 elif n == 1:
     playerF = False
     tictactoe = tictactoe(board, 1)
-    while True:
+    while tictactoe.boardCheck(tictactoe.gameBoard) == 0:
         tictactoe.aiMove()
         tictactoe.printBoard()
         tictactoe.playerMove()
+        tictactoe.printBoard()
