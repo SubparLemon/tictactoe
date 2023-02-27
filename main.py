@@ -1,213 +1,136 @@
-class tictactoe:
-    def __init__(self, gameBoard, side):
-        self.gameBoard = gameBoard
-        self.side = side
+import math
 
-    def playerMove(self):
-        loc = int(input("Where to place? (1,9): "))
-        if self.side == 0:
-            playerMark = 'X'
-        else:
-            playerMark = 'O'
-        match loc:
-            case 1:
-                self.gameBoard[0] = playerMark
-            case 2:
-                self.gameBoard[1] = playerMark
-            case 3:
-                self.gameBoard[2] = playerMark
-            case 4:
-                self.gameBoard[3] = playerMark
-            case 5:
-                self.gameBoard[4] = playerMark
-            case 6:
-                self.gameBoard[5] = playerMark
-            case 7:
-                self.gameBoard[6] = playerMark
-            case 8:
-                self.gameBoard[7] = playerMark
-            case 9:
-                self.gameBoard[8] = playerMark
 
-    def miniMax(self, board, side, minMax):
-        if side == 1:
-            aiMark = 'X'
-            pMark = 'O'
-        elif side == 0:
-            aiMark = 'O'
-            pMark = 'X'
-        if minMax == 1:
-            if boardCheck(board) == 1:
-                return 0
-            elif boardCheck(board) == 2 and side == 1:
-                return 1
-            elif boardCheck(board) == 3 and side == 0:
-                return 1
+def printBoard(boardState, playerLetter, computerLetter):
+    for i in range(3):
+        row = boardState[i * 3:i * 3 + 3]
+        rowString = []
+        for val in row:
+            if val == -1:
+                rowString.append(playerLetter)
+            elif val == 1:
+                rowString.append(computerLetter)
+            elif val == 0:
+                rowString.append('-')
             else:
-                availableBoards = []
-                for index in range(len(self.gameBoard)):
-                    if self.gameBoard[index] == '-':
-                        newBoard = self.gameBoard.copy()
-                        newBoard[index] = aiMark
-                        availableBoards.append(newBoard)
-                for nextBoard in availableBoards:
-                    self.miniMax(nextBoard, self.side, 0)
-        elif minMax == 0:
-            if boardCheck(board) == 1:
-                return 0
-            elif boardCheck(board) == 3 and side == 1:
-                return -1
-            elif boardCheck(board) == 2 and side == 0:
-                return -1
-            else:
-                availableBoards = []
-                for index in range(len(self.gameBoard)):
-                    if self.gameBoard[index] == '-':
-                        newBoard = self.gameBoard.copy()
-                        newBoard[index] = aiMark
-                        availableBoards.append(newBoard)
-                for nextBoard in availableBoards:
-                    self.miniMax(nextBoard, self.side, 1)
-
-    def aiMove(self):
-        if self.side == 1:
-            aiMark = 'X'
-        elif self.side == 0:
-            aiMark = 'O'
-        availableBoards = []
-        for i in range(len(self.gameBoard)):
-            if self.gameBoard[i] == '-':
-                newBoard = self.gameBoard.copy()
-                newBoard[i] = aiMark
-                availableBoards.append(newBoard)
-        # creates a new board for all legal possibilities
-        scores = []
-        for board in availableBoards:
-            scores.append(self.miniMax(board, self.side, self.side))
-        for i in range(len(scores)):
-            if scores[i] == max(scores):
-                self.gameBoard = availableBoards[i]
+                rowString.append(str(val))
+        print(" ".join(rowString))
 
 
-        #for x in range(len(self.gameBoard)):
-        #    if self.gameBoard[x] == '-':
-        #        minimax
-                #boards.append(nextMoveBoard(self.gameBoard, x, aiMark, True, True))
-       #if boardCheck(self.gameBoard) == 0:
-       #    maxVal = boards[0].pathValue()
-       #    print(boards[0].pathValue())
-       #    for x in boards:
-       #        if x.pathValue() > maxVal:
-       #            maxVal = x.pathValue()
-       #    for x in boards:
-       #        if x.pathValue() == maxVal:
-       #            self.gameBoard[x.firstMove] = aiMark
-       #            break
+def isFull(boardState):
+    return emptySlot not in boardState
 
-    def printBoard(self):
-        for x in range(0, 8, 3):
-            print(self.gameBoard[x] + self.gameBoard[x+1] + self.gameBoard[x+2])
-        print('\n')
 
-#class nextMoveBoard:
-#
-#    def __init__(self, board, firstMoveIndex, side, turn, first):
-#        self.board = board.copy()
-#        self.firstMove = firstMoveIndex
-#        self.side = side
-#        self.turn = turn
-    #    self.first = first
-    #    self.aiValue = 0
-    #    self.playerValue = 0
-    #    self.depth = 1
-    #    self.innerBoards = []
-    #    self.playerInnerBoards = []
-    #    self.board[self.firstMove] = side
-    #    if boardCheck(self.board) == 0:
-    #        if turn is True:
-    #            for nextMove in range(len(self.board)):
-    #                if self.board[nextMove] == '-':
-    #                    innerBoard = nextMoveBoard(self.board, nextMove, self.side, False, False)
-    #                    innerBoard.depth = self.depth + 1
-    #                    self.innerBoards.append(innerBoard)
-    #        elif turn is False:
-    #            if side == 'X':
-    #                playerMark = 'O'
-    #            else:
-    #                playerMark = 'X'
-    #            for nextMove in range(len(self.board)):
-    #                if self.board[nextMove] == '-':
-    #                    innerBoard = nextMoveBoard(self.board, nextMove, playerMark, True, False)
-    #                    innerBoard.depth = self.depth + 1
-    #                    self.innerBoards.append(innerBoard)
-    #    else:
-    #        if self.side == 'O':
-    #            if boardCheck(self.board) == 1:
-    #                self.aiValue = 0
-    #            elif boardCheck(self.board) == 3:
-    #                self.aiValue = 1
-    #            elif boardCheck(self.board) == 2:
-    #                self.aiValue = -1
-    #        if self.side == 'X':
-    #            if boardCheck(self.board) == 1:
-    #                self.aiValue = 0
-    #            elif boardCheck(self.board) == 2:
-    #                self.aiValue = 1
-    #            elif boardCheck(self.board) == 3:
-    #                self.aiValue = -1
+def getWinner(boardState):
+    # Check rows
+    for i in range(0, 9, 3):
+        if boardState[i] == boardState[i + 1] == boardState[i + 2] and boardState[i] != emptySlot:
+            return boardState[i]
+    # Check columns
+    for i in range(3):
+        if boardState[i] == boardState[i + 3] == boardState[i + 6] and boardState[i] != emptySlot:
+            return boardState[i]
+    # Check diagonals
+    if boardState[0] == boardState[4] == boardState[8] and boardState[0] != emptySlot:
+        return boardState[0]
+    if boardState[2] == boardState[4] == boardState[6] and boardState[2] != emptySlot:
+        return boardState[2]
+    # No winner
+    return None
 
-    #def pathValue(self):
-    #    valueSum = self.aiValue
-    #    for inner_board in self.innerBoards:
-    #        inner_board_value = inner_board.pathValue()
-    #        if inner_board_value != 0:
-    #            valueSum += inner_board_value
-    #    return valueSum
-def boardCheck(board):
-    xwin = "XXX"
-    owin = "OOO"
-    # x win
-    if (board[0] + board[1] + board[2]) == xwin or (
-            board[3] + board[4] + board[5]) == xwin or (
-            board[6] + board[7] + board[8]) == xwin or (
-            board[0] + board[3] + board[6]) == xwin or (
-            board[1] + board[4] + board[7]) == xwin or (
-            board[2] + board[5] + board[8]) == xwin or (
-            board[0] + board[4] + board[8]) == xwin or (
-            board[2] + board[4] + board[6]) == xwin:
-        return 2
-    # o win
-    if (board[0] + board[1] + board[2]) == owin or (
-            board[3] + board[4] + board[5]) == owin or (
-            board[6] + board[7] + board[8]) == owin or (
-            board[0] + board[3] + board[6]) == owin or (
-            board[1] + board[4] + board[7]) == owin or (
-            board[2] + board[5] + board[8]) == owin or (
-            board[0] + board[4] + board[8]) == owin or (
-            board[2] + board[4] + board[6]) == owin:
-        return 3
-    # draw check
-    if board.count('-') == 0:
+
+def getAvailableMoves(boardState):
+    # returns indices of empty slots by iteratively checking if the boardstate is an empty slot
+    return [i for i in range(len(boardState)) if boardState[i] == emptySlot]
+
+
+def evaluate(boardState):
+    winner = getWinner(boardState)
+    if winner == computerPlayer:
         return 1
-    return 0
+    elif winner == humanPlayer:
+        return -1
+    else:
+        return 0
 
-board = ['-', '-', '-', '-', '-', '-', '-', '-', '-']
-userInput = int(input("First(0) or Second(1) "))
 
-playerF = True
-if userInput == 0:
-    tictactoe = tictactoe(board, 0)
-    while boardCheck(tictactoe.gameBoard) == 0:
-        tictactoe.playerMove()
-        tictactoe.printBoard()
-        tictactoe.aiMove()
-        tictactoe.printBoard()
+def minimax(boardState, depth, player):
+    # maximize
+    if player == computerPlayer:
+        bestScore = -math.inf
+        best_move = None
+        # loop for each legal move
+        for move in getAvailableMoves(boardState):
+            newBoardState = boardState.copy()
+            newBoardState[move] = player
+            score = minimax(newBoardState, depth + 1, humanPlayer)
+            if score > bestScore:
+                bestScore = score
+                best_move = move
+    # minimize
+    else:
+        bestScore = math.inf
+        best_move = None
+        for move in getAvailableMoves(boardState):
+            newBoardState = boardState.copy()
+            newBoardState[move] = player
+            score = minimax(newBoardState, depth + 1, computerPlayer)
+            if score < bestScore:
+                bestScore = score
+                best_move = move
+    if best_move is None:
+        return evaluate(boardState)
+    if depth == 0:
+        return best_move
+    return bestScore
 
-elif userInput == 1:
-    playerF = False
-    tictactoe = tictactoe(board, 1)
-    while boardCheck(tictactoe.gameBoard) == 0:
-        tictactoe.aiMove()
-        tictactoe.printBoard()
-        tictactoe.playerMove()
-        tictactoe.printBoard()
+def main():
+    # copys the board
+    boardState = initialBoardState.copy()
+    # input to determine who goes first
+    currentPlayer = humanPlayer if input("Do you want to go first? (y/n): ").lower() == "y" else computerPlayer
+    # sets variables for printing board
+    playerLetter = 'X' if currentPlayer == humanPlayer else 'O'
+    computerLetter = '0' if playerLetter == 'X' else 'X'
+    # repeats until board is full
+    while not isFull(boardState):
+        printBoard(boardState, playerLetter, computerLetter)
+        # player turn
+        if currentPlayer == humanPlayer:
+            move = int(input("Enter your move (1-9): "))-1
+            if boardState[move] != emptySlot:
+                print("Invalid move")
+                continue
+            boardState[move] = humanPlayer
+        # computer turn
+        else:
+            print("Computer is thinking...")
+            move = minimax(boardState, 0, computerPlayer)
+            boardState[move] = computerPlayer
+
+        winner = getWinner(boardState)
+        if winner is not None:
+            printBoard(boardState, playerLetter, computerLetter)
+            if winner == humanPlayer:
+                print("Cheater")
+            elif winner == computerPlayer:
+                print("Idiot")
+            else:
+                print("It's a draw. Who could've guessed")
+            return
+
+        currentPlayer = -currentPlayer
+
+    printBoard(boardState, playerLetter, computerLetter)
+    print("It's a draw. Who could've guessed")
+
+# sets constant values for different states of a board space
+humanPlayer = -1
+computerPlayer = 1
+emptySlot = 0
+
+# creates a list of 9 0 elements
+initialBoardState = [0] * 9
+
+# runs the main game loop
+main()
